@@ -4,6 +4,9 @@ Track interview tasks from **assigned** to **reviewed**: a candidate (interviewe
 an interviewer reviews the submission, and the verdict + feedback are recorded — all visible in
 one table.
 
+**🔗 Live demo: [humi-home-assignment.vercel.app](https://humi-home-assignment.vercel.app)** —
+sign in with a [demo login](#try-it--demo-logins) below (no setup needed).
+
 > Product thinking (problem, scope decisions, data model, flow) is in **[PRD.md](./PRD.md)**.
 
 ## Try it — demo logins
