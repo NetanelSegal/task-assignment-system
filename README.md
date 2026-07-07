@@ -60,8 +60,9 @@ The app needs a Firebase project:
    npm run deploy:rules
    ```
 
-   The rules require authentication for everything and restrict task/role management
-   to the admin — the server-side mirror of the app's role model.
+   The rules require authentication for everything, restrict task & template management to
+   managers (admin + semi-admin), and lock role changes / user removal to the admin — the
+   server-side mirror of the app's role model.
 
 ## Run it
 
@@ -95,8 +96,8 @@ npm run seed:demo
 
 ```
 app/page.tsx           the role-scoped task table (the whole workflow)
-app/templates/page.tsx assignment template library (admin)
-app/people/page.tsx    role management (admin)
+app/templates/page.tsx assignment template library (managers)
+app/people/page.tsx    people directory (admin manages roles/removal; semi-admin read-only)
 app/login, app/register  auth pages
 components/            auth gate, task/review/submit/template modals, nav, UI primitives
 lib/types.ts           domain model + lifecycle + template→task helpers
