@@ -1,0 +1,54 @@
+rules_version = '2';
+
+// Server-side mirror of the app's role model. Client-side checks are UX;
+// these rules are the actual security boundary.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Admin is an identity, not a stored role — decided by email. This list is
+    // mirrored in lib/types.ts (ADMIN_EMAILS); keep the two in sync.
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() in ['admin@humi-demo.com'];
+    }
+
+    // Admin or semi-admin — may manage tasks and templates.
+    function isManager() {
+      return isAdmin()
+        || (signedIn()
+            && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'semi_admin');
+    }
+
+    match /users/{userId} {
+      // any signed-in user may see who's who (names shown on tasks)
+      allow read: if signedIn();
+      // registration creates your own profile (doc id = auth uid) with a
+      // self-selectable role only; the admin may add profile records (seed data)
+      // and grant semi_admin.
+      allow create: if isAdmin()
+        || (request.auth.uid == userId
+            && request.resource.data.role in ['candidate', 'interviewer']);
+      // only the admin manages roles / removes people
+      allow update, delete: if isAdmin();
+    }
+
+    match /templates/{templateId} {
+      // the template library is the managers' toolbox (admin + semi-admin)
+      allow read, write: if isManager();
+    }
+
+    match /tasks/{taskId} {
+      allow read: if signedIn();
+      // managers create and delete tasks
+      allow create, delete: if isManager();
+      // candidates submit and interviewers review — both are updates;
+      // field-level enforcement is left to the app for this exercise
+      allow update: if signedIn();
+    }
+  }
+}
